@@ -91,10 +91,10 @@ def main():
     # Coordinate history #################################################################
     history_length = 16
     point_history = deque(maxlen=history_length)
-
+    
     # Finger gesture history ################################################
     finger_gesture_history = deque(maxlen=history_length)
-
+    
     #  ########################################################################
     mode = 0
 
@@ -152,13 +152,14 @@ def main():
                 if point_history_len == (history_length * 2):
                     finger_gesture_id = point_history_classifier(
                         pre_processed_point_history_list)
-
                 # Calculates the gesture IDs in the latest detection
                 finger_gesture_history.append(finger_gesture_id)
                 most_common_fg_id = Counter(
                     finger_gesture_history).most_common()
 
                 # Drawing part
+                #print(brect) # Print list of 4 values left/right up/down
+                #print(landmark_list)
                 debug_image = draw_bounding_rect(use_brect, debug_image, brect)
                 debug_image = draw_landmarks(debug_image, landmark_list)
                 debug_image = draw_info_text(
@@ -173,7 +174,7 @@ def main():
 
         debug_image = draw_point_history(debug_image, point_history)
         debug_image = draw_info(debug_image, fps, mode, number)
-
+        #print(draw_point_history(debug_image, point_history))
         # Screen reflection #############################################################
         cv.imshow('Hand Gesture Recognition', debug_image)
 
@@ -512,8 +513,56 @@ def draw_info_text(image, brect, handedness, hand_sign_text,
     return image
 
 
+#####   Getting values from index finger   #####
+
+#  X = Left/Right   |   Y = Up/Down
+coordinates_x = []
+coordinates_y = []
+#x_counter=0
+#y_counter=0
+
+
+# Draw green circles, made by the index finger:
 def draw_point_history(image, point_history):
     for index, point in enumerate(point_history):
+
+        # Getting the circle coordinates in a list with two values, like: [350,210]
+        if point[0] != 0:
+            
+            # Variables
+            coordinates_x.append(point[0])
+            coordinates_y.append(point[1]) 
+            my_mean_x = np.mean(coordinates_x)
+            my_actual_x = coordinates_x[-1]
+            my_mean_y = np.mean(coordinates_y)
+            my_actual_y = coordinates_y[-1]
+
+            # Check the X axis            
+            if abs(my_mean_x-my_actual_x) < 15:
+                #print("##########")
+                continue
+            elif my_mean_x > my_actual_x:
+                print("Left!")
+            elif my_mean_x < my_actual_x:
+                print("Right!")
+
+            # Check the Y axis
+            if abs(my_mean_y-my_actual_y) < 15:
+                #print("##########")
+                continue
+            elif my_mean_y > my_actual_y:
+                print("UP!")
+            elif my_mean_y < my_actual_y:
+                print("DOWN!")
+
+            # Clean coordinates values if go up to 30 values
+            if len(coordinates_x) == 30:
+                coordinates_x.pop(0)
+                coordinates_y.pop(0)
+        else:
+            continue
+
+        # Draw circles
         if point[0] != 0 and point[1] != 0:
             cv.circle(image, (point[0], point[1]), 1 + int(index / 2),
                       (152, 251, 152), 2)
