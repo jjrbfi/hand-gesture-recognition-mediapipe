@@ -533,7 +533,8 @@ def move_down():
 #  X = Left/Right   |   Y = Up/Down
 coordinates_x = []
 coordinates_y = []
-
+x_counter = 0
+y_counter = 0
 
 # Draw green circles, made by the index finger:
 def draw_point_history(image, point_history):
@@ -549,28 +550,47 @@ def draw_point_history(image, point_history):
             my_actual_x = coordinates_x[-1]
             my_mean_y = np.mean(coordinates_y)
             my_actual_y = coordinates_y[-1]
+            global x_counter
+            global y_counter
+
 
             # Move axis X by the right hand
             if hand_info_split[0] == "Right":                
                 # Check the X axis            
                 if abs(my_mean_x-my_actual_x) < 13:
-                    print("Stay")
-                    #continue
+                    #print("Stay")
+                    continue
                 elif my_mean_x > my_actual_x:
-                    move_left()
+                    x_counter=x_counter+1
+                    # When counter is equal to 10
+                    if x_counter == 10:
+                        x_counter=0
+                        move_left()
                 elif my_mean_x < my_actual_x:
-                    move_right()
+                    x_counter=x_counter+1
+                    # When counter is equal to 10
+                    if x_counter == 10:
+                        x_counter=0
+                        move_right()
 
             # Move axis Y by the left hand
             elif hand_info_split[0] == "Left":    
                 # Check the Y axis
                 if abs(my_mean_y-my_actual_y) < 13:
-                    print("Stay")
-                    #continue
+                    #print("Stay")
+                    continue
                 elif my_mean_y > my_actual_y:
-                    move_up()
+                    y_counter=y_counter+1
+                    # When counter is equal to 10
+                    if y_counter == 10:
+                        y_counter=0
+                        move_up()
                 elif my_mean_y < my_actual_y:
-                    move_down()
+                    y_counter=y_counter+1
+                    # When counter is equal to 10
+                    if y_counter == 10:
+                        y_counter=0
+                        move_down()
 
             # Clean coordinates values if go up to 30 values
             if len(coordinates_x) == 30:
