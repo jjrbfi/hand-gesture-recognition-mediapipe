@@ -491,15 +491,18 @@ def draw_bounding_rect(use_brect, image, brect):
 
     return image
 
+hand_info=""
 
 def draw_info_text(image, brect, handedness, hand_sign_text,
                    finger_gesture_text):
+    global hand_info
     cv.rectangle(image, (brect[0], brect[1]), (brect[2], brect[1] - 22),
                  (0, 0, 0), -1)
 
     info_text = handedness.classification[0].label[0:]
     if hand_sign_text != "":
         info_text = info_text + ':' + hand_sign_text
+        hand_info=info_text
     cv.putText(image, info_text, (brect[0] + 5, brect[1] - 4),
                cv.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1, cv.LINE_AA)
 
@@ -513,22 +516,32 @@ def draw_info_text(image, brect, handedness, hand_sign_text,
     return image
 
 
+def move_left():
+    print("LEFT!")
+
+def move_right():
+    print("Right!")
+
+def move_up():
+    print("UP!")
+
+def move_down():
+    print("Down!")
+
 #####   Getting values from index finger   #####
 
 #  X = Left/Right   |   Y = Up/Down
 coordinates_x = []
 coordinates_y = []
-#x_counter=0
-#y_counter=0
 
 
 # Draw green circles, made by the index finger:
 def draw_point_history(image, point_history):
     for index, point in enumerate(point_history):
-
+        hand_info_split = hand_info.split(":")
+        #print(hand_info_split[0])
         # Getting the circle coordinates in a list with two values, like: [350,210]
         if point[0] != 0:
-            
             # Variables
             coordinates_x.append(point[0])
             coordinates_y.append(point[1]) 
@@ -537,23 +550,27 @@ def draw_point_history(image, point_history):
             my_mean_y = np.mean(coordinates_y)
             my_actual_y = coordinates_y[-1]
 
-            # Check the X axis            
-            if abs(my_mean_x-my_actual_x) < 15:
-                #print("##########")
-                continue
-            elif my_mean_x > my_actual_x:
-                print("Left!")
-            elif my_mean_x < my_actual_x:
-                print("Right!")
+            # Move axis X by the right hand
+            if hand_info_split[0] == "Right":                
+                # Check the X axis            
+                if abs(my_mean_x-my_actual_x) < 13:
+                    print("Stay")
+                    #continue
+                elif my_mean_x > my_actual_x:
+                    move_left()
+                elif my_mean_x < my_actual_x:
+                    move_right()
 
-            # Check the Y axis
-            if abs(my_mean_y-my_actual_y) < 15:
-                #print("##########")
-                continue
-            elif my_mean_y > my_actual_y:
-                print("UP!")
-            elif my_mean_y < my_actual_y:
-                print("DOWN!")
+            # Move axis Y by the left hand
+            elif hand_info_split[0] == "Left":    
+                # Check the Y axis
+                if abs(my_mean_y-my_actual_y) < 13:
+                    print("Stay")
+                    #continue
+                elif my_mean_y > my_actual_y:
+                    move_up()
+                elif my_mean_y < my_actual_y:
+                    move_down()
 
             # Clean coordinates values if go up to 30 values
             if len(coordinates_x) == 30:
