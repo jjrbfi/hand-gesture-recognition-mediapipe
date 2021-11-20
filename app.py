@@ -515,26 +515,53 @@ def draw_info_text(image, brect, handedness, hand_sign_text,
 
     return image
 
+move_left_v = 0
+move_right_v = 0
+move_up_v = 0
+move_down_v = 0
+
 
 def move_left():
-    print("LEFT!")
+    global move_left_v
+    
+    move_left_v=move_left_v+1
+    if move_left_v == 4:
+        print("LEFT!")
+        move_left_v = 0
 
 def move_right():
-    print("Right!")
+    global move_right_v
+    
+    move_right_v=move_right_v+1
+    if move_right_v == 4:
+        print("Right!")
+        move_right_v = 0
 
 def move_up():
-    print("UP!")
+    global move_up_v
+    
+    move_up_v=move_up_v+1
+    if move_up_v == 4:
+        print("UP!")
+        move_up_v = 0
 
 def move_down():
-    print("Down!")
+    global move_down_v
+    
+    move_down_v=move_down_v+1
+    if move_down_v == 4:
+        print("Down!")
+        move_down_v = 0
 
 #####   Getting values from index finger   #####
 
 #  X = Left/Right   |   Y = Up/Down
 coordinates_x = []
 coordinates_y = []
-x_counter = 0
-y_counter = 0
+x_counter_right = 0
+x_counter_left = 0
+y_counter_up = 0
+y_counter_down = 0
 
 # Draw green circles, made by the index finger:
 def draw_point_history(image, point_history):
@@ -544,52 +571,60 @@ def draw_point_history(image, point_history):
         # Getting the circle coordinates in a list with two values, like: [350,210]
         if point[0] != 0:
             # Variables
+            max_value_movement = 10
+            counter_max = 8
             coordinates_x.append(point[0])
             coordinates_y.append(point[1]) 
             my_mean_x = np.mean(coordinates_x)
             my_actual_x = coordinates_x[-1]
             my_mean_y = np.mean(coordinates_y)
             my_actual_y = coordinates_y[-1]
-            global x_counter
-            global y_counter
+            global x_counter_left
+            global x_counter_right
+            global y_counter_up
+            global y_counter_down
 
 
             # Move axis X by the right hand
             if hand_info_split[0] == "Right":                
                 # Check the X axis            
-                if abs(my_mean_x-my_actual_x) < 13:
+                if abs(my_mean_x-my_actual_x) < max_value_movement:
                     #print("Stay")
                     continue
                 elif my_mean_x > my_actual_x:
-                    x_counter=x_counter+1
+                    x_counter_left=x_counter_left+1
                     # When counter is equal to 10
-                    if x_counter == 10:
-                        x_counter=0
+                    if x_counter_left == counter_max:
+                        x_counter_left = 0
+                        x_counter_right = 0
                         move_left()
                 elif my_mean_x < my_actual_x:
-                    x_counter=x_counter+1
+                    x_counter_right=x_counter_right+1
                     # When counter is equal to 10
-                    if x_counter == 10:
-                        x_counter=0
+                    if x_counter_right == counter_max:
+                        x_counter_right = 0
+                        x_cunter_left = 0
                         move_right()
 
             # Move axis Y by the left hand
             elif hand_info_split[0] == "Left":    
                 # Check the Y axis
-                if abs(my_mean_y-my_actual_y) < 13:
+                if abs(my_mean_y-my_actual_y) < max_value_movement:
                     #print("Stay")
                     continue
                 elif my_mean_y > my_actual_y:
-                    y_counter=y_counter+1
+                    y_counter_up=y_counter_up+1
                     # When counter is equal to 10
-                    if y_counter == 10:
-                        y_counter=0
+                    if y_counter_up == counter_max:
+                        y_counter_up = 0
+                        y_counter_down = 0
                         move_up()
                 elif my_mean_y < my_actual_y:
-                    y_counter=y_counter+1
+                    y_counter_down=y_counter_down+1
                     # When counter is equal to 10
-                    if y_counter == 10:
-                        y_counter=0
+                    if y_counter_down == counter_max:
+                        y_counter_down = 0
+                        y_counter_up = 0
                         move_down()
 
             # Clean coordinates values if go up to 30 values
